@@ -11,6 +11,7 @@ Timukas is a project created for Microsoft's Fix Hack Learn 2023 hackathon. It i
 ```bash
 git clone https://github.com/RasmusKoit/Timukas timukas
 cd timukas
+cp example.env .env
 flutter run
 ```
 
