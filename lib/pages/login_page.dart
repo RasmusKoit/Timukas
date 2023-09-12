@@ -42,23 +42,37 @@ class LoginPageState extends State<LoginPage> {
     }
   }
 
-  Future addUserDetails() async {
+  Future<void> addUserDetails() async {
     // check if document with user.uid exists, if not, add it
-    final DocumentSnapshot<Map<String, dynamic>> userDoc =
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(auth.currentUser?.uid)
-            .get();
-    if (!userDoc.exists) {
-      // add document with id user.uid
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(auth.currentUser?.uid)
-          .set({
-        'id': auth.currentUser?.uid,
+    // Reference to the user's document
+    final User? user = auth.currentUser;
+    DocumentReference<Map<String, dynamic>> userDocRef =
+        FirebaseFirestore.instance.collection('users').doc(user?.uid);
+
+    // Fetch the user's document
+    DocumentSnapshot<Map<String, dynamic>> docSnapshot = await userDocRef.get();
+
+    // Check if the document exists
+    if (!docSnapshot.exists) {
+      // Document does not exist, add collections and data
+
+      // Add 'public' subcollection with 'publicData' document
+      await userDocRef.collection('public').doc('publicData').set({
         'levelsCompleted': 0,
-        'lg': "et",
+        'levelsFailed': 0,
+        'nickName': 'Anonymous'
+        // Add other fields and values as needed
       });
+
+      // Add 'private' subcollection with 'privateData' document
+      await userDocRef.collection('private').doc('privateData').set({
+        'email': auth.currentUser?.email ?? 'No email',
+        'displayName': auth.currentUser?.displayName ?? 'Anonymous',
+        'levelsPlayed': 0,
+      });
+    } else {
+      // Document exists, do nothing
+      return;
     }
   }
 
