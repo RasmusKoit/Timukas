@@ -48,6 +48,13 @@ jobs:
       - name: Create .env file
         run: echo "AZ_API_KEY=$AZ_API_KEY" > .env
 
+      - name: Create key.properties file
+        run: |
+          echo "storePassword=$SIGNING_STORE_PASSWORD" > /home/runner/work/Timukas/Timukas/android/key.properties
+          echo "keyPassword=$SIGNING_KEY_PASSWORD" >> /home/runner/work/Timukas/Timukas/android/key.properties
+          echo "keyAlias=$SIGNING_KEY_ALIAS" >> /home/runner/work/Timukas/Timukas/android/key.properties
+          echo "storeFile=android/app/keystore/android_keystore.jks" >> /home/runner/work/Timukas/Timukas/android/key.properties
+
       - name: Build APK
         run: flutter build apk --split-per-abi --release
         env:
