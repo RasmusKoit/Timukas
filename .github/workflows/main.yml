@@ -1,0 +1,52 @@
+name: "Build Flutter APK's and App bundle"
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "develop" branch
+  push:
+    branches: ["master"]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      AZ_API_KEY: ${{ secrets.AZ_API_KEY }}
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - uses: actions/checkout@v3
+
+      # Set up Flutter.
+      - uses: subosito/flutter-action@v1
+        with:
+          channel: "stable"
+      - run: flutter doctor -v
+
+      # Checkout the repository code and get packages.
+      - name: Checkout flutter_app code
+        uses: actions/checkout@v3
+      - run: flutter pub get
+
+      - name: Create .env file
+        run: echo "AZ_API_KEY=$AZ_API_KEY" > .env
+
+      - name: Build APK
+        run: flutter build apk --split-per-abi --release
+
+      - name: Build APP BUNDLE
+        run: flutter build appbundle
+
+      - name: Create Release
+        uses: ncipollo/release-action@v1.10.0
+        with:
+          artifacts: "build/app/outputs/apk/release/*.apk, build/app/outputs/bundle/release/*.aab"
+
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v3.1.0
+        with:
+          name: release-apk
+          path: build/app/outputs/apk/
