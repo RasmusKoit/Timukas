@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:timukas/models/word.dart';
 import 'package:timukas/util/app_bar_title.dart';
 import 'package:timukas/util/bool_widget.dart';
+import 'package:timukas/util/const.dart';
 import 'package:timukas/util/display_word.dart';
 import 'package:timukas/util/keyboard.dart';
 import 'package:timukas/util/main_menu_button.dart';
@@ -14,15 +15,16 @@ import 'package:timukas/util/show_image.dart';
 import 'package:http/http.dart' as http;
 
 class PlayPage extends StatefulWidget {
-  final List<Word> words;
-  const PlayPage({super.key, required this.words});
+  final String wordsFile;
+  const PlayPage({super.key, required this.wordsFile});
 
   @override
   State<PlayPage> createState() => _PlayPageState();
 }
 
 class _PlayPageState extends State<PlayPage> {
-  List<Word> get words => widget.words;
+  get wordsFile => widget.wordsFile;
+  List<Word> words = [];
   TextEditingController guessController = TextEditingController();
   Word word = Word(word: '');
   String guessedLetters = '';
@@ -43,33 +45,61 @@ class _PlayPageState extends State<PlayPage> {
   }
 
   initializeWord() async {
+    await readWords();
     if (words.isNotEmpty) {
       final Word newWord = await chooseWord();
       setState(() {
         word = newWord;
+        guessedLetters = '_ ' * newWord.word.length;
       });
     } else {
-      print('was empty');
+      if (mounted) {
+        showSnackBar(
+            context, 'Failed to initialize', const Duration(seconds: 1));
+      }
     }
   }
 
+  Future<void> readWords() async {
+    final List<Word> readWords = [];
+    final String data =
+        await DefaultAssetBundle.of(context).loadString(wordsFile);
+    final List<String> lines = data.split('\n');
+    for (String line in lines) {
+      final Word word = Word(word: line);
+      readWords.add(word);
+    }
+    setState(() {
+      words = readWords;
+    });
+  }
+
   Future<Word> chooseWord({String oldWord = ''}) async {
-    // Choose a random word from the list
-    // Check if we get a response from the API, if not, generate new random word
+    Word wordToSearch = Word(word: '');
     bool keepSearching = true;
-    Word randomWord = words[Random().nextInt(words.length)];
-    Word word = await fetchWord(randomWord.word);
-    while (keepSearching) {
-      randomWord = words[Random().nextInt(words.length)];
-      word = await fetchWord(randomWord.word);
-      if (word.meanings != null &&
-              word.meanings!.isNotEmpty &&
-              oldWord.isEmpty ||
-          word.word != oldWord) {
+    // Add a maximum number of attempts to avoid infinite loop
+    int maxAttempts = 100;
+
+    for (int attempts = 0;
+        attempts < maxAttempts && keepSearching;
+        attempts++) {
+      final randomIndex = Random().nextInt(words.length);
+      final randomWord = words[randomIndex];
+      wordToSearch = await fetchWord(randomWord.word);
+
+      if (wordToSearch.meanings != null &&
+          wordToSearch.meanings!.isNotEmpty &&
+          (oldWord.isEmpty || wordToSearch.word != oldWord)) {
         keepSearching = false;
       }
     }
-    return word;
+
+    if (keepSearching) {
+      // Handle the case where no suitable word is found within the maximum attempts
+      throw Exception('Failed to find a suitable word');
+    }
+
+    return wordToSearch;
   }
 
   Future<Word> fetchWord(String wordToSearch, {bool showSnack = false}) async {
@@ -86,8 +116,9 @@ class _PlayPageState extends State<PlayPage> {
     if (response.statusCode == 400) message = 'Word not found';
     if (response.statusCode == 429) message = 'Too many requests';
     // Other errors
-    if (context.mounted && showSnack)
+    if (context.mounted && showSnack) {
       showSnackBar(context, message, const Duration(milliseconds: 500));
+    }
     return Word(word: wordToSearch);
   }
 
@@ -137,7 +168,14 @@ class _PlayPageState extends State<PlayPage> {
   }
 
   Future<void> increaseCounter(String fieldName) async {
-    await docRef.update({fieldName: FieldValue.increment(1)});
+    // Update either levelsCompleted or levelsFailed
+    await docRef.collection('public').doc('publicData').update({
+      fieldName: FieldValue.increment(1),
+    });
+    // Update levelsPlayed
+    await docRef.collection('private').doc('privateData').update({
+      'levelsPlayed': FieldValue.increment(1),
+    });
   }
 
   Future<void> levelFinished() async {
@@ -145,19 +183,17 @@ class _PlayPageState extends State<PlayPage> {
     // second time we will navigate to the next level
     if (gameOver && resultMessage == 'Play again?') {
       final Word newWord = await chooseWord(oldWord: word.word);
-      print('generate new word');
-      print(newWord.word);
-      word = newWord;
-      if (mounted) {
-        setState(() {
-          word = word;
-          gameOver = false;
-          resultMessage = '';
-          guessedLetters = '_ ' * word.word.length;
-          wrongGuesses = 1;
-          guessController.clear();
-        });
-      }
+
+      // if (mounted) {
+      setState(() {
+        word = newWord;
+        gameOver = false;
+        resultMessage = '';
+        guessedLetters = '_ ' * newWord.word.length;
+        wrongGuesses = 1;
+        guessController.clear();
+      });
+      // }
     } else {
       setState(() {
         resultMessage = 'Play again?';
