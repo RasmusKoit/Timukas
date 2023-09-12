@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "451011440019",
+    "project_id": "timukas-3d575",
+    "storage_bucket": "timukas-3d575.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:451011440019:android:06b4c9a5fc6b0bb71dcc66",
+        "android_client_info": {
+          "package_name": "dev.koit.timukas"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "451011440019-6gpv4j5k7gm876gaih8ki924o9l66bmp.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "dev.koit.timukas",
+            "certificate_hash": "26f19a060e7d8b19a6000ef76e326a09d4eaa7fc"
+          }
+        },
+        {
+          "client_id": "451011440019-mqf59b8gmrf7e4qs0ae5kigfbar33v5o.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyChy9q06g2bYj8Dcw3cNJQWMUpbEhUtVJY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "451011440019-mqf59b8gmrf7e4qs0ae5kigfbar33v5o.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
