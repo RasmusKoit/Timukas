@@ -43,7 +43,7 @@ jobs:
         with:
           fileName: 'android_keystore.jks'
           fileDir: '/home/runner/work/Timukas/Timukas/app/keystore/'
-          encodeString: ${{ secrets.KEYSTORE }}
+          encodedString: ${{ secrets.KEYSTORE }}
         
       - name: Create .env file
         run: echo "AZ_API_KEY=$AZ_API_KEY" > .env
