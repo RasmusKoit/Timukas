@@ -14,31 +14,53 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+
     env:
       AZ_API_KEY: ${{ secrets.AZ_API_KEY }}
+      SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+      SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+      SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+      
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - uses: actions/checkout@v3
-
+      
       # Set up Flutter.
       - uses: subosito/flutter-action@v1
         with:
           channel: "stable"
       - run: flutter doctor -v
 
+      
       # Checkout the repository code and get packages.
       - name: Checkout flutter_app code
         uses: actions/checkout@v3
       - run: flutter pub get
-
+      # Create the keystore file
+      - name: Decode Keystore
+        id: decode_keystore
+        uses: timheuer/base64-to-file@v1.2
+        with:
+          fileName: 'android_keystore.jks'
+          fileDir: '/home/runner/work/Timukas/Timukas/app/keystore/'
+          encodeString: ${{ secrets.KEYSTORE }}
+        
       - name: Create .env file
         run: echo "AZ_API_KEY=$AZ_API_KEY" > .env
 
       - name: Build APK
         run: flutter build apk --split-per-abi --release
+        env:
+          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
 
       - name: Build APP BUNDLE
         run: flutter build appbundle
+        env:
+          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
 
       - name: Create Release
         uses: ncipollo/release-action@v1.10.0
