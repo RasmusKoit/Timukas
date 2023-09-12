@@ -132,8 +132,8 @@ class _SearchPageState extends State<SearchPage> {
                       isSelected: isSelected,
                       onPressed: onFlagSelect,
                       children: [
-                        CountryFlags.flag('EE', width: 40, borderRadius: 4),
-                        CountryFlags.flag('US', width: 40, borderRadius: 4),
+                        CountryFlag.fromCountryCode('ee', width: 40, borderRadius: 4) ,
+                        CountryFlag.fromCountryCode('us', width: 40, borderRadius: 4),
                       ]),
                 ),
               ],
