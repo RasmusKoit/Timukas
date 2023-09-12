@@ -3,8 +3,16 @@ name: "Build Flutter APK's and App bundle"
 # Controls when the workflow will run
 on:
   # Triggers the workflow on push or pull request events but only for the "develop" branch
-  push:
-    branches: ["master"]
+  workflow_dispatch:
+    inputs:
+      build_name:
+        description: 'Build Name'
+        required: true
+        default: '1.0.0'
+      build_number:
+        description: 'Build Number'
+        required: true
+        default: '1'
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -56,14 +64,14 @@ jobs:
           echo "storeFile=keystore/android_keystore.jks" >> /home/runner/work/Timukas/Timukas/android/key.properties
 
       - name: Build APK
-        run: flutter build apk --split-per-abi --release
+        run: flutter build apk --split-per-abi --release --build-number ${{ github.event.inputs.build_number }} --build-name ${{ github.event.inputs.build_name }}
         env:
           SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
           SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
 
       - name: Build APP BUNDLE
-        run: flutter build appbundle
+        run: flutter build appbundle --build-number ${{ github.event.inputs.build_number }} --build-name ${{ github.event.inputs.build_name }}
         env:
           SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
