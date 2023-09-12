@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:timukas/models/word.dart';
 import 'package:timukas/pages/about_page.dart';
 import 'package:timukas/pages/login_page.dart';
 import 'package:timukas/pages/play_page.dart';
@@ -100,7 +99,7 @@ class _HomePageState extends State<HomePage> {
                   MaterialPageRoute(builder: (context) => const SearchPage()),
                 );
               },
-              child: Text('Search'),
+              child: const Text('Search'),
             ),
             MainMenuButton(
               onPressed: () {

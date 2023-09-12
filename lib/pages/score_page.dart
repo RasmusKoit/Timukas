@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:timukas/pages/play_page.dart';
 import 'package:timukas/util/app_bar_title.dart';
 import 'package:timukas/util/const.dart';
 
@@ -28,10 +29,12 @@ class _ScorePageState extends State<ScorePage> {
         });
       }
 
-      print(levelsCompletedList);
       return levelsCompletedList;
     } catch (e) {
-      print('Error fetching levelsCompleted: $e');
+      if (mounted) {
+        showSnackBar(
+            context, 'Failed to pull data', const Duration(seconds: 1));
+      }
       return [];
     }
   }

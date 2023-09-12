@@ -182,7 +182,7 @@ class _ShowUserInfoState extends State<ShowUserInfo> {
                 ],
               ),
             )),
-            Spacer(),
+            const Spacer(),
             ElevatedButton(
                 onPressed: deleteUser, child: const Text('Delete Account')),
           ],
