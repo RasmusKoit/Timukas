@@ -14,7 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-
+    env:
+      AZ_API_KEY: ${{ secrets.AZ_API_KEY }}
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - uses: actions/checkout@v3
@@ -29,6 +30,9 @@ jobs:
       - name: Checkout flutter_app code
         uses: actions/checkout@v3
       - run: flutter pub get
+
+      - name: Create .env file
+        run: echo "AZ_API_KEY=$AZ_API_KEY" > .env
 
       - name: Build APK
         run: flutter build apk --split-per-abi --release
