@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:timukas/util/const.dart';
 
 class ShowUserInfo extends StatefulWidget {
@@ -100,92 +101,152 @@ class _ShowUserInfoState extends State<ShowUserInfo> {
     }
   }
 
+  void showEditDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        String newName = docPublic?.data()?['nickName'] ?? '';
+        return AlertDialog(
+          title: const Text('Edit your nickname'),
+          content: TextField(
+            onChanged: (value) {
+              newName = value;
+            },
+            controller: TextEditingController(text: newName),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                // Update the display name in Firestore
+                FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(user?.uid)
+                    .collection('public')
+                    .doc('publicData')
+                    .update({'nickName': newName});
+                Navigator.of(context).pop();
+                getUserDetails();
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (docPublic == null && docPrivate == null) {
+    if (docPublic == null || docPrivate == null) {
       return const Center(child: CircularProgressIndicator());
     } else {
       final docPrivateData = docPrivate?.data();
       final docPublicData = docPublic?.data();
-      return Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Card(
-                child: Container(
-              padding: const EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10.0),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.3),
-                    spreadRadius: 2,
-                    blurRadius: 5,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  CircleAvatar(
-                      radius: 60.0,
-                      backgroundImage: user.photoURL != null
-                          ? NetworkImage(user.photoURL!)
-                          : const AssetImage('lib/images/default_avatar.png')
-                              as ImageProvider<Object>?),
-                  const SizedBox(height: 16.0),
-                  Text(
-                    docPrivateData?['displayName'] ?? '',
-                    style: const TextStyle(
-                      fontSize: 24.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8.0),
-                  Text(
-                    docPrivateData?['email'] ?? '',
-                    style: const TextStyle(
-                      fontSize: 16.0,
-                      color: Colors.grey,
-                    ),
-                  ),
-                  Text(
-                    'Completed levels: ${docPublicData?['levelsCompleted'] ?? 0}',
-                  ),
-                  Text(
-                    'Total levels played: ${docPrivateData?['levelsPlayed'] ?? 0}',
-                  ),
-                  const SizedBox(height: 16.0),
-                  ElevatedButton(
-                    onPressed: () {
-                      if (mounted) {
-                        setState(() {
-                          widget.onPressed();
-                        });
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: estBlue, // Button color
-                    ),
-                    child: const Text(
-                      'Log Out',
-                      style: TextStyle(
-                        fontSize: 16.0,
-                        color: Colors.white,
+      return SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Card(
+              child: Container(
+            padding: const EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10.0),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.3),
+                  spreadRadius: 2,
+                  blurRadius: 5,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircleAvatar(
+                    radius: 60.0,
+                    backgroundImage: user.photoURL != null
+                        ? NetworkImage(user.photoURL!)
+                        : const AssetImage('lib/images/default_avatar.png')
+                            as ImageProvider<Object>?),
+                const SizedBox(height: 16.0),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      onPressed: () {},
+                      icon: const FaIcon(
+                        FontAwesomeIcons.skull,
+                        size: 20,
                       ),
                     ),
+                    Text(
+                      docPublicData?['nickName'] ?? '',
+                      style: const TextStyle(
+                        fontSize: 24.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        // Open a dialog for editing the display name
+                        showEditDialog();
+                      },
+                      icon: const Icon(
+                        Icons.edit,
+                        size: 20,
+                      ),
+                    ),
+                  ],
+                ),
+                Text(
+                  docPrivateData?['email'] ?? '',
+                  style: const TextStyle(
+                    fontSize: 16.0,
+                    color: Colors.grey,
                   ),
-                ],
-              ),
-            )),
-            const Spacer(),
-            ElevatedButton(
-                onPressed: deleteUser, child: const Text('Delete Account')),
-          ],
+                ),
+                Text(
+                  'Completed levels: ${docPublicData?['levelsCompleted'] ?? 0}',
+                ),
+                Text(
+                  'Total levels played: ${docPrivateData?['levelsPlayed'] ?? 0}',
+                ),
+                const SizedBox(height: 16.0),
+                ElevatedButton(
+                  onPressed: () {
+                    if (mounted) {
+                      setState(() {
+                        widget.onPressed();
+                      });
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: estBlue, // Button color
+                  ),
+                  child: const Text(
+                    'Log Out',
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 32.0),
+                ElevatedButton(
+                    onPressed: deleteUser, child: const Text('Delete Account')),
+              ],
+            ),
+          )),
         ),
       );
     }

@@ -126,7 +126,8 @@ class _HomePageState extends State<HomePage> {
                   MaterialPageRoute(builder: (context) => const LoginPage()),
                 );
               },
-              child: const Text('User'),
+              child: Text(
+                  FirebaseAuth.instance.currentUser == null ? 'Login' : 'User'),
             ),
           ],
         ),
