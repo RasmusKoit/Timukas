@@ -1,11 +1,8 @@
-import 'dart:convert';
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:timukas/models/word.dart';
 import 'package:timukas/util/api.dart';
 import 'package:timukas/util/app_bar_title.dart';
@@ -14,8 +11,8 @@ import 'package:timukas/util/const.dart';
 import 'package:timukas/util/display_word.dart';
 import 'package:timukas/util/keyboard.dart';
 import 'package:timukas/util/main_menu_button.dart';
+import 'package:timukas/util/play_page_header.dart';
 import 'package:timukas/util/show_image.dart';
-import 'package:http/http.dart' as http;
 
 class PlayPage extends StatefulWidget {
   final String wordsFile;
@@ -31,13 +28,9 @@ class _PlayPageState extends State<PlayPage> {
   TextEditingController guessController = TextEditingController();
   Word word = Word(word: '');
   String guessedLetters = '';
-  String translatedDefinition = '';
-  bool showTranslatedDefinition = false;
   int wrongGuesses = 1;
-  final bImage = Image.asset('lib/images/Hangman_1.png');
   bool gameOver = false;
   String resultMessage = '';
-  FirebaseAuth auth = FirebaseAuth.instance;
   DocumentReference docRef = FirebaseFirestore.instance
       .collection('users')
       .doc(FirebaseAuth.instance.currentUser?.uid);
@@ -46,7 +39,6 @@ class _PlayPageState extends State<PlayPage> {
   void initState() {
     super.initState();
     initializeWord();
-    guessedLetters = '_ ' * word.word.length;
   }
 
   initializeWord() async {
@@ -81,13 +73,11 @@ class _PlayPageState extends State<PlayPage> {
 
   Future<Word> chooseWord({String oldWord = ''}) async {
     Word wordToSearch = Word(word: '');
-    bool keepSearching = true;
+    bool search = true;
     // Add a maximum number of attempts to avoid infinite loop
-    int maxAttempts = 100;
+    const int maxAttempts = 100;
 
-    for (int attempts = 0;
-        attempts < maxAttempts && keepSearching;
-        attempts++) {
+    for (int attempt = 0; attempt < maxAttempts && search; attempt++) {
       final randomIndex = Random().nextInt(words.length);
       final randomWord = words[randomIndex];
       wordToSearch = await fetchWord(randomWord.word);
@@ -95,11 +85,11 @@ class _PlayPageState extends State<PlayPage> {
       if (wordToSearch.meanings != null &&
           wordToSearch.meanings!.isNotEmpty &&
           (oldWord.isEmpty || wordToSearch.word != oldWord)) {
-        keepSearching = false;
+        search = false;
       }
     }
 
-    if (keepSearching) {
+    if (search) {
       // Handle the case where no suitable word is found within the maximum attempts
       throw Exception('Failed to find a suitable word');
     }
@@ -133,7 +123,6 @@ class _PlayPageState extends State<PlayPage> {
           gameOver = true;
           resultMessage = 'You won!';
         });
-        // Update user's levelsCompleted
       }
     }
     // If the letter is not in the word, increase the wrongGuesses counter
@@ -146,7 +135,6 @@ class _PlayPageState extends State<PlayPage> {
           gameOver = true;
           resultMessage = 'You lost!';
         });
-        // Update user's levelsFailed
       }
     }
     guessController.text += letter;
@@ -169,37 +157,19 @@ class _PlayPageState extends State<PlayPage> {
     if (gameOver && resultMessage == 'Play again?') {
       final Word newWord = await chooseWord(oldWord: word.word);
 
-      // if (mounted) {
       setState(() {
         word = newWord;
         gameOver = false;
         resultMessage = '';
         guessedLetters = '_ ' * newWord.word.length;
         wrongGuesses = 1;
-        showTranslatedDefinition = false;
-        translatedDefinition = '';
         guessController.clear();
       });
-      // }
     } else {
       setState(() {
         resultMessage = 'Play again?';
       });
     }
-  }
-
-  Future<void> translateDefinition(String text) async {
-    if (text == translatedDefinition || translatedDefinition != '') {
-      setState(() {
-        showTranslatedDefinition = !showTranslatedDefinition;
-      });
-      return;
-    }
-    final String definition = await translateText(text, 'et', 'en');
-    setState(() {
-      translatedDefinition = definition;
-      showTranslatedDefinition = true;
-    });
   }
 
   @override
@@ -218,48 +188,10 @@ class _PlayPageState extends State<PlayPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
-                children: [
-                  const SizedBox(height: 16),
-                  BoolWidget(
-                    primary: Text(
-                      guessedLetters,
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                    secondary: Text(
-                      word.word,
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                    value: !gameOver,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        IconButton(
-                            onPressed: () {
-                              translateDefinition(word.getDefinitions()[0]);
-                            },
-                            icon: const Icon(
-                              Icons.language,
-                              color: estBlue,
-                            )),
-                        const SizedBox(width: 8),
-                        Flexible(
-                          child: Text(
-                            translatedDefinition != '' &&
-                                    showTranslatedDefinition
-                                ? translatedDefinition
-                                : word.getDefinitions()[0],
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(fontSize: 16),
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                ],
+              PlayPageHeader(
+                guessedLetters: guessedLetters,
+                gameOver: gameOver,
+                word: word,
               ),
               const SizedBox(height: 16),
               Expanded(
@@ -270,10 +202,8 @@ class _PlayPageState extends State<PlayPage> {
                           padding: const EdgeInsets.all(8.0),
                           child: DisplayWord(word: word)),
                     ),
-                    secondary: ShowImage(
-                      width: bImage.width,
-                      height: bImage.height,
-                      image: AssetImage('lib/images/Hangman_$wrongGuesses.png'),
+                    secondary: ShowHangManImages(
+                      numberOfGuesses: wrongGuesses,
                     ),
                     value: gameOver && resultMessage == 'Play again?'),
               ),
@@ -311,10 +241,12 @@ class _PlayPageState extends State<PlayPage> {
 }
 
 void showSnackBar(BuildContext context, String message, Duration duration) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text(message),
-      duration: duration,
-    ),
-  );
+  if (context.mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: duration,
+      ),
+    );
+  }
 }
