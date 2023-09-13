@@ -13,6 +13,9 @@ import 'package:timukas/pages/Home/main_menu_button.dart';
 import 'package:timukas/pages/Play/play_page_header.dart';
 import 'package:timukas/pages/Play/show_image.dart';
 
+const int kMaxAttempts = 100;
+const int kMaxWrongGuesses = 12;
+
 class PlayPage extends StatefulWidget {
   final String wordsFile;
   const PlayPage({super.key, required this.wordsFile});
@@ -74,9 +77,8 @@ class _PlayPageState extends State<PlayPage> {
     Word wordToSearch = Word(word: '');
     bool search = true;
     // Add a maximum number of attempts to avoid infinite loop
-    const int maxAttempts = 100;
 
-    for (int attempt = 0; attempt < maxAttempts && search; attempt++) {
+    for (int attempt = 0; attempt < kMaxAttempts && search; attempt++) {
       final randomIndex = Random().nextInt(words.length);
       final randomWord = words[randomIndex];
       wordToSearch = await fetchWord(randomWord.word);
@@ -128,7 +130,7 @@ class _PlayPageState extends State<PlayPage> {
     else {
       setState(() => wrongGuesses++);
       showSnackBar(context, 'Incorrect!', const Duration(milliseconds: 200));
-      if (wrongGuesses == 12) {
+      if (wrongGuesses == kMaxWrongGuesses) {
         increaseCounter('levelsFailed');
         setState(() {
           gameOver = true;
@@ -173,63 +175,60 @@ class _PlayPageState extends State<PlayPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (word.word == '') {
-      return Scaffold(
-        appBar: AppBar(title: const MyAppBarTitle(title: Text('Play'))),
-        body: const Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-    } else {
-      return Scaffold(
-        appBar: AppBar(title: const MyAppBarTitle(title: Text('Play'))),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              PlayPageHeader(
-                guessedLetters: guessedLetters,
-                gameOver: gameOver,
-                word: word,
-              ),
-              const SizedBox(height: 16),
-              Expanded(
-                child: BoolWidget(
-                    primary: Container(
-                      color: Colors.grey[100],
-                      child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: DisplayWord(word: word)),
-                    ),
-                    secondary: ShowHangManImages(
-                      numberOfGuesses: wrongGuesses,
-                    ),
-                    value: gameOver && resultMessage == 'Play again?'),
-              ),
-              // Show keyboard or action buttons
-              BoolWidget(
-                primary: Column(
-                  children: [
-                    MainMenuButton(
-                      onPressed: levelFinished,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(resultMessage),
-                          const Text('Continue'),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                secondary: EstonianKeyboard(onLetterTap: onKeyboardKeyTap),
-                value: gameOver,
-              )
-            ],
+    return Scaffold(
+      appBar: AppBar(title: const MyAppBarTitle(title: Text('Play'))),
+      body: word.word == ''
+          ? const Center(child: CircularProgressIndicator())
+          : _buildGameView(),
+    );
+  }
+
+  Widget _buildGameView() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          PlayPageHeader(
+            guessedLetters: guessedLetters,
+            gameOver: gameOver,
+            word: word,
           ),
-        ),
-      );
-    }
+          const SizedBox(height: 16),
+          Expanded(
+            child: BoolWidget(
+                primary: Container(
+                  color: Colors.grey[100],
+                  child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: DisplayWord(word: word)),
+                ),
+                secondary: ShowHangManImages(
+                  numberOfGuesses: wrongGuesses,
+                ),
+                value: gameOver && resultMessage == 'Play again?'),
+          ),
+          // Show keyboard or action buttons
+          BoolWidget(
+            primary: Column(
+              children: [
+                MainMenuButton(
+                  onPressed: levelFinished,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(resultMessage),
+                      const Text('Continue'),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            secondary: EstonianKeyboard(onLetterTap: onKeyboardKeyTap),
+            value: gameOver,
+          )
+        ],
+      ),
+    );
   }
 
   @override
