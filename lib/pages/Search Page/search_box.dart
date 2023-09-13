@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'const.dart';
+import '../../util/const.dart';
 
 class SearchBox extends StatefulWidget {
   final TextEditingController controller;

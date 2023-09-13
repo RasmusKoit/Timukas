@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:timukas/util/app_bar_title.dart';
+import 'package:timukas/util/Widgets/app_bar_title.dart';
 
 class AboutPage extends StatelessWidget {
   AboutPage({super.key});

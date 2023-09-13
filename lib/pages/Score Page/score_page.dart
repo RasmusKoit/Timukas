@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:timukas/pages/play_page.dart';
-import 'package:timukas/util/app_bar_title.dart';
+import 'package:timukas/pages/Play%20Page/play_page.dart';
+import 'package:timukas/util/Widgets/app_bar_title.dart';
 import 'package:timukas/util/const.dart';
 
 class ScorePage extends StatefulWidget {

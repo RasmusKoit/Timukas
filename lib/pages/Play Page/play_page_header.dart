@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:timukas/models/word.dart';
 import 'package:timukas/util/api.dart';
-import 'package:timukas/util/bool_widget.dart';
+import 'package:timukas/util/Widgets/bool_widget.dart';
 import 'package:timukas/util/const.dart';
 
 class PlayPageHeader extends StatefulWidget {

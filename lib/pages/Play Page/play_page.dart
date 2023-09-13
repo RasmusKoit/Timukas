@@ -5,13 +5,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:timukas/models/word.dart';
 import 'package:timukas/util/api.dart';
-import 'package:timukas/util/app_bar_title.dart';
-import 'package:timukas/util/bool_widget.dart';
-import 'package:timukas/util/display_word.dart';
-import 'package:timukas/util/keyboard.dart';
-import 'package:timukas/util/main_menu_button.dart';
-import 'package:timukas/util/play_page_header.dart';
-import 'package:timukas/util/show_image.dart';
+import 'package:timukas/util/Widgets/app_bar_title.dart';
+import 'package:timukas/util/Widgets/bool_widget.dart';
+import 'package:timukas/util/Widgets/display_word.dart';
+import 'package:timukas/util/Widgets/keyboard.dart';
+import 'package:timukas/pages/Home%20Page/main_menu_button.dart';
+import 'package:timukas/pages/Play%20Page/play_page_header.dart';
+import 'package:timukas/pages/Play%20Page/show_image.dart';
 
 class PlayPage extends StatefulWidget {
   final String wordsFile;

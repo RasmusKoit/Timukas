@@ -2,11 +2,11 @@ import 'package:country_flags/country_flags.dart';
 import 'package:flutter/material.dart';
 import 'package:timukas/models/word.dart';
 import 'package:timukas/util/api.dart';
-import 'package:timukas/util/app_bar_title.dart';
-import 'package:timukas/util/bool_widget.dart';
-import 'package:timukas/util/display_word.dart';
-import 'package:timukas/util/keyboard.dart';
-import 'package:timukas/util/search_box.dart';
+import 'package:timukas/util/Widgets/app_bar_title.dart';
+import 'package:timukas/util/Widgets/bool_widget.dart';
+import 'package:timukas/util/Widgets/display_word.dart';
+import 'package:timukas/util/Widgets/keyboard.dart';
+import 'package:timukas/pages/Search%20Page/search_box.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
