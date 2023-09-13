@@ -1,15 +1,12 @@
-import 'dart:convert';
-
 import 'package:country_flags/country_flags.dart';
 import 'package:flutter/material.dart';
 import 'package:timukas/models/word.dart';
+import 'package:timukas/util/api.dart';
 import 'package:timukas/util/app_bar_title.dart';
 import 'package:timukas/util/bool_widget.dart';
 import 'package:timukas/util/display_word.dart';
 import 'package:timukas/util/keyboard.dart';
-import 'package:http/http.dart' as http;
 import 'package:timukas/util/search_box.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -38,50 +35,6 @@ class _SearchPageState extends State<SearchPage> {
     });
   }
 
-  Future<String?> translateWord(String wordToTranslate) async {
-    final apiKey = dotenv.env['AZ_API_KEY'];
-    if (apiKey == null) {
-      return null;
-    }
-    const String endPoint =
-        'https://api.cognitive.microsofttranslator.com/translate?api-version=3.0&from=en&to=et';
-    final Map<String, String> headers = {
-      'Ocp-Apim-Subscription-Key': apiKey,
-      'Ocp-Apim-Subscription-Region': 'germanywestcentral',
-      'Content-type': 'application/json',
-    };
-    final requestBody = jsonEncode([
-      {'Text': wordToTranslate}
-    ]);
-    final response = await http.post(
-      Uri.parse(endPoint),
-      headers: headers,
-      body: requestBody,
-    );
-    if (response.statusCode == 200) {
-      final jsonResponse = jsonDecode(response.body);
-      final String translatedText = jsonResponse[0]['translations'][0]['text'];
-      return translatedText.toLowerCase();
-    } else {
-      return null;
-    }
-  }
-
-  Future<Word> fetchWord(String wordToSearch) async {
-    final uri = Uri.parse('https://sonapi.koit.dev/v1/$wordToSearch');
-    final response = await http.get(
-      uri,
-      headers: {'Accept': 'application/json'},
-    );
-    if (response.statusCode == 200) {
-      final jsonData = jsonDecode(response.body);
-
-      return Word.fromJson(jsonData);
-    } else {
-      return Word(word: '');
-    }
-  }
-
   Future<void> searchWord() async {
     String searchWord = searchController.text;
     if (searchWord.isEmpty) {
@@ -93,8 +46,8 @@ class _SearchPageState extends State<SearchPage> {
     if (isSelected[0]) {
       word = await fetchWord(searchWord);
     } else {
-      final result = await translateWord(searchWord);
-      if (result == null) {
+      final result = await translateText(searchWord, 'en', 'et');
+      if (result == '') {
         word = Word(word: '');
       } else {
         word = await fetchWord(result);
@@ -132,8 +85,10 @@ class _SearchPageState extends State<SearchPage> {
                       isSelected: isSelected,
                       onPressed: onFlagSelect,
                       children: [
-                        CountryFlag.fromCountryCode('ee', width: 40, borderRadius: 4) ,
-                        CountryFlag.fromCountryCode('us', width: 40, borderRadius: 4),
+                        CountryFlag.fromCountryCode('ee',
+                            width: 40, borderRadius: 4),
+                        CountryFlag.fromCountryCode('us',
+                            width: 40, borderRadius: 4),
                       ]),
                 ),
               ],

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:timukas/models/word.dart';
+import 'package:timukas/util/api.dart';
 import 'package:timukas/util/app_bar_title.dart';
 import 'package:timukas/util/bool_widget.dart';
 import 'package:timukas/util/const.dart';
@@ -31,6 +32,7 @@ class _PlayPageState extends State<PlayPage> {
   Word word = Word(word: '');
   String guessedLetters = '';
   String translatedDefinition = '';
+  bool showTranslatedDefinition = false;
   int wrongGuesses = 1;
   final bImage = Image.asset('lib/images/Hangman_1.png');
   bool gameOver = false;
@@ -105,26 +107,6 @@ class _PlayPageState extends State<PlayPage> {
     return wordToSearch;
   }
 
-  Future<Word> fetchWord(String wordToSearch, {bool showSnack = false}) async {
-    final uri = Uri.parse('https://sonapi.koit.dev/v1/$wordToSearch');
-    final response = await http.get(
-      uri,
-      headers: {'Accept': 'application/json'},
-    );
-    String message = '';
-    if (response.statusCode == 200) {
-      final jsonData = jsonDecode(response.body);
-      return Word.fromJson(jsonData);
-    }
-    if (response.statusCode == 400) message = 'Word not found';
-    if (response.statusCode == 429) message = 'Too many requests';
-    // Other errors
-    if (context.mounted && showSnack) {
-      showSnackBar(context, message, const Duration(milliseconds: 500));
-    }
-    return Word(word: wordToSearch);
-  }
-
   void onKeyboardKeyTap(String letter) {
     String correctWord = word.word.toLowerCase();
     letter = letter.toLowerCase();
@@ -194,6 +176,7 @@ class _PlayPageState extends State<PlayPage> {
         resultMessage = '';
         guessedLetters = '_ ' * newWord.word.length;
         wrongGuesses = 1;
+        showTranslatedDefinition = false;
         translatedDefinition = '';
         guessController.clear();
       });
@@ -205,39 +188,18 @@ class _PlayPageState extends State<PlayPage> {
     }
   }
 
-  Future<void> translateDefinition() async {
-    final String definition = word.getDefinitions()[0];
-    final apiKey = dotenv.env['AZ_API_KEY'];
-    if (translatedDefinition != '') {
-      return;
-    }
-    if (apiKey == null) {
-      return;
-    }
-    const String endPoint =
-        'https://api.cognitive.microsofttranslator.com/translate?api-version=3.0&from=et&to=en';
-    final Map<String, String> headers = {
-      'Ocp-Apim-Subscription-Key': apiKey,
-      'Ocp-Apim-Subscription-Region': 'germanywestcentral',
-      'Content-type': 'application/json',
-    };
-    final requestBody = jsonEncode([
-      {'Text': definition}
-    ]);
-    final response = await http.post(
-      Uri.parse(endPoint),
-      headers: headers,
-      body: requestBody,
-    );
-    print(jsonDecode(response.body));
-    if (response.statusCode == 200) {
-      final jsonResponse = jsonDecode(response.body);
-      final String translatedText = jsonResponse[0]['translations'][0]['text'];
-      print(translatedText);
+  Future<void> translateDefinition(String text) async {
+    if (text == translatedDefinition || translatedDefinition != '') {
       setState(() {
-        translatedDefinition = translatedText;
+        showTranslatedDefinition = !showTranslatedDefinition;
       });
+      return;
     }
+    final String definition = await translateText(text, 'et', 'en');
+    setState(() {
+      translatedDefinition = definition;
+      showTranslatedDefinition = true;
+    });
   }
 
   @override
@@ -276,7 +238,9 @@ class _PlayPageState extends State<PlayPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         IconButton(
-                            onPressed: translateDefinition,
+                            onPressed: () {
+                              translateDefinition(word.getDefinitions()[0]);
+                            },
                             icon: const Icon(
                               Icons.language,
                               color: estBlue,
@@ -284,7 +248,8 @@ class _PlayPageState extends State<PlayPage> {
                         const SizedBox(width: 8),
                         Flexible(
                           child: Text(
-                            translatedDefinition != ''
+                            translatedDefinition != '' &&
+                                    showTranslatedDefinition
                                 ? translatedDefinition
                                 : word.getDefinitions()[0],
                             textAlign: TextAlign.center,
