@@ -47,6 +47,11 @@ class Word {
     return definitions;
   }
 
+  void setDefinition(String definition) {
+    // Change the definition of the first meaning
+    meanings?[0].definition = definition;
+  }
+
   List<String> getExamples() {
     List<String> examples = [];
     meanings?.forEach((meaning) {

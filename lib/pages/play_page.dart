@@ -4,9 +4,12 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:timukas/models/word.dart';
 import 'package:timukas/util/app_bar_title.dart';
 import 'package:timukas/util/bool_widget.dart';
+import 'package:timukas/util/const.dart';
 import 'package:timukas/util/display_word.dart';
 import 'package:timukas/util/keyboard.dart';
 import 'package:timukas/util/main_menu_button.dart';
@@ -27,6 +30,7 @@ class _PlayPageState extends State<PlayPage> {
   TextEditingController guessController = TextEditingController();
   Word word = Word(word: '');
   String guessedLetters = '';
+  String translatedDefinition = '';
   int wrongGuesses = 1;
   final bImage = Image.asset('lib/images/Hangman_1.png');
   bool gameOver = false;
@@ -190,12 +194,48 @@ class _PlayPageState extends State<PlayPage> {
         resultMessage = '';
         guessedLetters = '_ ' * newWord.word.length;
         wrongGuesses = 1;
+        translatedDefinition = '';
         guessController.clear();
       });
       // }
     } else {
       setState(() {
         resultMessage = 'Play again?';
+      });
+    }
+  }
+
+  Future<void> translateDefinition() async {
+    final String definition = word.getDefinitions()[0];
+    final apiKey = dotenv.env['AZ_API_KEY'];
+    if (translatedDefinition != '') {
+      return;
+    }
+    if (apiKey == null) {
+      return;
+    }
+    const String endPoint =
+        'https://api.cognitive.microsofttranslator.com/translate?api-version=3.0&from=et&to=en';
+    final Map<String, String> headers = {
+      'Ocp-Apim-Subscription-Key': apiKey,
+      'Ocp-Apim-Subscription-Region': 'germanywestcentral',
+      'Content-type': 'application/json',
+    };
+    final requestBody = jsonEncode([
+      {'Text': definition}
+    ]);
+    final response = await http.post(
+      Uri.parse(endPoint),
+      headers: headers,
+      body: requestBody,
+    );
+    print(jsonDecode(response.body));
+    if (response.statusCode == 200) {
+      final jsonResponse = jsonDecode(response.body);
+      final String translatedText = jsonResponse[0]['translations'][0]['text'];
+      print(translatedText);
+      setState(() {
+        translatedDefinition = translatedText;
       });
     }
   }
@@ -230,10 +270,29 @@ class _PlayPageState extends State<PlayPage> {
                     ),
                     value: !gameOver,
                   ),
-                  Text(
-                    word.getDefinitions()[0],
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 16),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        IconButton(
+                            onPressed: translateDefinition,
+                            icon: const Icon(
+                              Icons.language,
+                              color: estBlue,
+                            )),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            translatedDefinition != ''
+                                ? translatedDefinition
+                                : word.getDefinitions()[0],
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                        ),
+                      ],
+                    ),
                   )
                 ],
               ),

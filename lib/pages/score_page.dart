@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:timukas/pages/play_page.dart';
 import 'package:timukas/util/app_bar_title.dart';
@@ -20,7 +19,6 @@ class _ScorePageState extends State<ScorePage> {
           .orderBy('levelsCompleted', descending: true)
           .get();
 
-      // return a list {name: nickName, levelsCompleted: 0}
       final List<Map<String, dynamic>> levelsCompletedList = [];
       for (var doc in querySnapshot.docs) {
         levelsCompletedList.add({
