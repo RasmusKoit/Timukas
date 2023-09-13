@@ -1,13 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:timukas/pages/About%20Page/about_page.dart';
-import 'package:timukas/pages/Login%20Page/login_page.dart';
-import 'package:timukas/pages/Play%20Page/play_page.dart';
-import 'package:timukas/pages/Score%20Page/score_page.dart';
-import 'package:timukas/pages/Search%20Page/search_page.dart';
+import 'package:timukas/pages/About/about_page.dart';
+import 'package:timukas/pages/Login/login_page.dart';
+import 'package:timukas/pages/Play/play_page.dart';
+import 'package:timukas/pages/Scoreboard/score_page.dart';
+import 'package:timukas/pages/Search/search_page.dart';
 import 'package:timukas/util/Widgets/app_bar_title.dart';
 import 'package:timukas/util/const.dart';
-import 'package:timukas/pages/Home%20Page/main_menu_button.dart';
+import 'package:timukas/pages/Home/main_menu_button.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

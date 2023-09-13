@@ -6,7 +6,7 @@ import 'package:timukas/util/Widgets/app_bar_title.dart';
 import 'package:timukas/util/Widgets/bool_widget.dart';
 import 'package:timukas/util/Widgets/display_word.dart';
 import 'package:timukas/util/Widgets/keyboard.dart';
-import 'package:timukas/pages/Search%20Page/search_box.dart';
+import 'package:timukas/pages/Search/search_box.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});

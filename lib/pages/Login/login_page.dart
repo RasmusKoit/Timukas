@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:timukas/util/Widgets/app_bar_title.dart';
-import 'package:timukas/pages/Login%20Page/show_user_info.dart';
+import 'package:timukas/pages/Login/show_user_info.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
