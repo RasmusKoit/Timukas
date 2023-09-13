@@ -17,6 +17,7 @@ class _ScorePageState extends State<ScorePage> {
       final QuerySnapshot querySnapshot = await FirebaseFirestore.instance
           .collectionGroup('public')
           .orderBy('levelsCompleted', descending: true)
+          .where('levelsCompleted', isGreaterThan: 0)
           .get();
 
       final List<Map<String, dynamic>> levelsCompletedList = [];
