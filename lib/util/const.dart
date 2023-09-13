@@ -51,3 +51,14 @@ extension LanguageExtension on Language {
     }
   }
 }
+
+void showSnackBar(BuildContext context, String message, Duration duration) {
+  if (context.mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: duration,
+      ),
+    );
+  }
+}
