@@ -1,28 +1,26 @@
 import 'package:flutter/material.dart';
 
-class ShowImage extends StatelessWidget {
-  final double? width;
-  final double? height;
-  final AssetImage image;
-  const ShowImage({
+class ShowHangManImages extends StatelessWidget {
+  final int numberOfGuesses;
+  const ShowHangManImages({
     super.key,
-    required this.width,
-    required this.height,
-    required this.image,
+    required this.numberOfGuesses,
   });
+
+  static Image bImage = Image.asset('lib/images/Hangman_1.png');
 
   @override
   Widget build(BuildContext context) {
+    final AssetImage image =
+        AssetImage('lib/images/Hangman_$numberOfGuesses.png');
     return Container(
       color: Colors.grey[100],
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: SizedBox(
-          width: width,
-          height: height,
-          child: Image(
-            image: image,
-          ),
+          width: bImage.width,
+          height: bImage.height,
+          child: Image(image: image),
         ),
       ),
     );
