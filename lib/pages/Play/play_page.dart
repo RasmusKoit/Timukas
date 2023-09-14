@@ -75,9 +75,7 @@ class _PlayPageContentState extends State<_PlayPageContent> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           PlayPageHeader(
-            guessedLetters: wordManager.guessedLetters,
-            gameOver: wordManager.gameOver,
-            word: wordManager.word,
+            wordManager: wordManager,
           ),
           const SizedBox(height: 16),
           Expanded(
@@ -124,7 +122,7 @@ class _PlayPageContentState extends State<_PlayPageContent> {
             ),
             secondary: EstonianKeyboard(
               onLetterTap: (letter) {
-                wordManager.guessLetter(letter);
+                wordManager.guessLetter(context, letter);
               },
             ),
             value: wordManager.gameOver,

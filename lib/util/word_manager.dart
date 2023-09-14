@@ -16,6 +16,7 @@ class WordManager extends ChangeNotifier {
   int wrongGuesses = 1;
   bool gameOver = false;
   String resultMessage = '';
+  TextEditingController textController = TextEditingController();
 
   WordManager({required this.wordsFile});
 
@@ -25,10 +26,10 @@ class WordManager extends ChangeNotifier {
       final Word newWord = await chooseWord();
       word = newWord;
       guessedLetters = '_ ' * newWord.word.length;
-      notifyListeners();
     } else {
       throw Exception('Failed to initialize');
     }
+    notifyListeners();
   }
 
   Future<void> newGame() async {
@@ -38,6 +39,7 @@ class WordManager extends ChangeNotifier {
     wrongGuesses = 1;
     gameOver = false;
     resultMessage = '';
+    textController.clear();
     notifyListeners();
   }
 
@@ -51,6 +53,7 @@ class WordManager extends ChangeNotifier {
       readWords.add(word);
     }
     words = readWords;
+    notifyListeners();
   }
 
   Future<Word> chooseWord({String oldWord = ''}) async {
@@ -78,9 +81,14 @@ class WordManager extends ChangeNotifier {
     return wordToSearch;
   }
 
-  void guessLetter(String letter) {
+  void guessLetter(BuildContext context, String letter) {
     letter = letter.toLowerCase();
-    if (guessedLetters.contains(letter)) {
+    if (textController.text.contains(letter)) {
+      // Show Snackbar notification here with msg: 'Letter already tried'
+      final snackBar = SnackBar(
+        content: Text('Letter $letter has already been tried.'),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
       return;
     }
     if (word.word.contains(letter)) {
@@ -102,6 +110,7 @@ class WordManager extends ChangeNotifier {
         resultMessage = 'You lost!';
       }
     }
+    textController.text += letter;
     notifyListeners();
   }
 }
