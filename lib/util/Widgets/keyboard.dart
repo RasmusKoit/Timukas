@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 
 class EstonianKeyboard extends StatefulWidget {
   final Function(String) onLetterTap;
+  final bool highLightKeys;
 
-  const EstonianKeyboard({super.key, required this.onLetterTap});
+  const EstonianKeyboard(
+      {super.key, required this.onLetterTap, this.highLightKeys = false});
 
   @override
   State<EstonianKeyboard> createState() => _EstonianKeyboardState();
@@ -16,6 +18,8 @@ class _EstonianKeyboardState extends State<EstonianKeyboard> {
     ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Ö', 'Ä'],
     ['Z', 'X', 'C', 'V', 'B', 'N', 'M', 'Š', 'Ž'],
   ];
+
+  Map<String, bool> keyTappedState = {};
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +44,13 @@ class _EstonianKeyboardState extends State<EstonianKeyboard> {
                             letter: letter,
                             onTap: () {
                               widget.onLetterTap(letter);
+                              if (widget.highLightKeys) {
+                                setState(() {
+                                  keyTappedState[letter] = true;
+                                });
+                              }
                             },
+                            isTapped: keyTappedState[letter] ?? false,
                           );
                         }).toList(),
                       );
@@ -76,9 +86,11 @@ class _EstonianKeyboardState extends State<EstonianKeyboard> {
 class KeyboardKey extends StatelessWidget {
   final String letter;
   final Function() onTap;
+  final bool isTapped;
 
   // ignore: use_key_in_widget_constructors
-  const KeyboardKey({required this.letter, required this.onTap});
+  const KeyboardKey(
+      {required this.letter, required this.onTap, required this.isTapped});
 
   @override
   Widget build(BuildContext context) {
@@ -88,7 +100,7 @@ class KeyboardKey extends StatelessWidget {
         margin: const EdgeInsets.all(4.0),
         padding: const EdgeInsets.all(4.0),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isTapped ? Colors.grey[300] : Colors.white,
           borderRadius: BorderRadius.circular(8.0),
         ),
         child: Center(

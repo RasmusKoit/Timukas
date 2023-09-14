@@ -124,6 +124,7 @@ class _PlayPageContentState extends State<_PlayPageContent> {
               onLetterTap: (letter) {
                 wordManager.guessLetter(context, letter);
               },
+              highLightKeys: true,
             ),
             value: wordManager.gameOver,
           )

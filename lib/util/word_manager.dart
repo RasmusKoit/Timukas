@@ -87,6 +87,7 @@ class WordManager extends ChangeNotifier {
       // Show Snackbar notification here with msg: 'Letter already tried'
       final snackBar = SnackBar(
         content: Text('Letter $letter has already been tried.'),
+        duration: const Duration(milliseconds: 200),
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
       return;
