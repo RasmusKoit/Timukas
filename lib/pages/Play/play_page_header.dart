@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:timukas/util/api.dart';
+import 'package:timukas/util/api/api.dart';
 import 'package:timukas/util/Widgets/bool_widget.dart';
 import 'package:timukas/util/const.dart';
 import 'package:timukas/util/word_manager.dart';

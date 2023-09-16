@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:timukas/models/word.dart';
-import 'package:timukas/util/api.dart';
+import 'package:timukas/util/api/api.dart';
 
 const int kMaxAttempts = 100;
 const int kMaxWrongGuesses = 12;

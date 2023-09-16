@@ -1,7 +1,7 @@
 import 'package:country_flags/country_flags.dart';
 import 'package:flutter/material.dart';
 import 'package:timukas/models/word.dart';
-import 'package:timukas/util/api.dart';
+import 'package:timukas/util/api/api.dart';
 import 'package:timukas/util/Widgets/app_bar_title.dart';
 import 'package:timukas/util/Widgets/bool_widget.dart';
 import 'package:timukas/util/Widgets/display_word.dart';
